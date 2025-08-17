@@ -4,7 +4,7 @@ Eagle Bank is a simple banking application built with Java and Spring Boot. It p
 
 ## 📌 Features
 
-- Create manage and fetch user
+- Create, manage and fetch user
 - Create and fetch accounts
 - Create transactions
 - RESTful API endpoints with JSON responses
