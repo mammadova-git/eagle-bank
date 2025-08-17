@@ -1,46 +1,54 @@
 package com.example.eagle_bank.authentication;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.web.filter.GenericFilterBean;
 
 import java.io.IOException;
 import java.util.Collections;
 
 @Component
-public class JwtFilter extends GenericFilterBean {
+public class JwtFilter extends HttpFilter {
 
     @Autowired
     private JwtUtil jwtUtil;
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+    public void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws IOException, ServletException {
 
-        HttpServletRequest httpRequest = (HttpServletRequest) request;
-        String authHeader = httpRequest.getHeader("Authorization");
+        String authHeader = request.getHeader("Authorization");
 
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.substring(7);
-            String email = jwtUtil.extractEmail(token);
+        try {
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                String token = authHeader.substring(7);
 
-            if (jwtUtil.validateToken(token, email)) {
-                Long userId = jwtUtil.extractUserId(token);
-                UserPrincipal principal = new UserPrincipal(userId, email);
+                if (!jwtUtil.isTokenExpired(token)) {
+                    Long userId = jwtUtil.extractUserId(token);
+                    String email = jwtUtil.extractEmail(token);
+                    UserPrincipal principal = new UserPrincipal(userId, email);
 
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(principal, null, Collections.emptyList());
+                    UsernamePasswordAuthenticationToken authentication =
+                            new UsernamePasswordAuthenticationToken(principal, null, Collections.emptyList());
 
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-            } else {
-                throw new ServletException("Invalid JWT token");
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                } else {
+                    throw new ServletException("Invalid JWT token");
+                }
             }
-        }
 
-        chain.doFilter(request, response);
+            chain.doFilter(request, response);
+        } catch (ExpiredJwtException e) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("{\"error\":\"JWT token has expired\"}");
+        } catch (JwtException e) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("{\"error\":\"Invalid JWT token\"}");
+        }
     }
 }

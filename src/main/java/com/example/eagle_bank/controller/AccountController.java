@@ -1,7 +1,7 @@
 package com.example.eagle_bank.controller;
 
-import com.example.eagle_bank.dto.AccountRequest;
-import com.example.eagle_bank.dto.AccountResponse;
+import com.example.eagle_bank.dto.CreateBankAccountRequest;
+import com.example.eagle_bank.dto.BankAccountResponse;
 import com.example.eagle_bank.service.AccountService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,23 +20,23 @@ public class AccountController {
     private final AccountService accountService;
 
     @PostMapping
-    public ResponseEntity<AccountResponse> createAccount(@Valid @RequestBody AccountRequest accountRequest,
-                                                         Authentication authentication
+    public ResponseEntity<BankAccountResponse> createAccount(@Valid @RequestBody CreateBankAccountRequest createBankAccountRequest,
+                                                             Authentication authentication
     ) {
-        AccountResponse response = accountService.createAccount(accountRequest, authentication);
+        BankAccountResponse response = accountService.createAccount(createBankAccountRequest, authentication);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping
-    public ResponseEntity<List<AccountResponse>> getAccounts(Authentication authentication) {
-        List<AccountResponse> accounts = accountService.getAccounts(authentication);
+    public ResponseEntity<List<BankAccountResponse>> getAccounts(Authentication authentication) {
+        List<BankAccountResponse> accounts = accountService.getAccounts(authentication);
         return ResponseEntity.ok(accounts);
     }
 
     @GetMapping("/{accountId}")
-    public ResponseEntity<AccountResponse> getAccount(@PathVariable Long accountId,
+    public ResponseEntity<BankAccountResponse> getAccount(@PathVariable Long accountId,
                                                           Authentication authentication) {
-        AccountResponse accountResponse = accountService.getAccount(accountId, authentication);
-        return ResponseEntity.ok(accountResponse);
+        BankAccountResponse bankAccountResponse = accountService.getAccount(accountId, authentication);
+        return ResponseEntity.ok(bankAccountResponse);
     }
 }

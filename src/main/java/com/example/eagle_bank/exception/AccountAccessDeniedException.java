@@ -6,11 +6,9 @@ import org.springframework.http.HttpStatus;
 @Getter
 public class AccountAccessDeniedException extends RuntimeException {
     private final HttpStatus status;
-    private final Long accountId;
 
-    public AccountAccessDeniedException(String message, HttpStatus status, Long accountId) {
+    public AccountAccessDeniedException(String message, HttpStatus status) {
         super(message);
         this.status = status;
-        this.accountId = accountId;
     }
 }

@@ -1,8 +1,9 @@
 package com.example.eagle_bank.controller;
 
-import com.example.eagle_bank.dto.UserRequest;
+import com.example.eagle_bank.dto.CreateUserRequest;
 import com.example.eagle_bank.dto.UserResponse;
 import com.example.eagle_bank.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -15,8 +16,8 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    public void createUser(@RequestBody UserRequest userRequest){
-        userService.createUser(userRequest);
+    public UserResponse createUser(@Valid @RequestBody CreateUserRequest createUserRequest){
+        return userService.createUser(createUserRequest);
     }
 
     @GetMapping("/{userId}")
@@ -25,8 +26,8 @@ public class UserController {
     }
 
     @PatchMapping("/{userId}")
-    public UserResponse updateUser(@PathVariable Long userId, @RequestBody UserRequest userRequest, Authentication authentication) {
-        return userService.updateUser(userId, userRequest, authentication);
+    public UserResponse updateUser(@PathVariable Long userId, @RequestBody CreateUserRequest createUserRequest, Authentication authentication) {
+        return userService.updateUser(userId, createUserRequest, authentication);
     }
 
     @DeleteMapping("/{userId}")

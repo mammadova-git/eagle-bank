@@ -6,11 +6,9 @@ import org.springframework.http.HttpStatus;
 @Getter
 public class UserNotFoundException extends RuntimeException {
     private final HttpStatus status;
-    private final Long userId;
 
-    public UserNotFoundException(String message, HttpStatus status, Long userId) {
+    public UserNotFoundException(String message, HttpStatus status) {
         super(message);
         this.status = status;
-        this.userId = userId;
     }
 }

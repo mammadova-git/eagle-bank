@@ -25,7 +25,6 @@ public class AuthenticationService {
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new AuthenticationFailedException("Invalid email or password");
         }
-
         String token = jwtUtil.generateToken(request.getEmail(), user.getId());
         return new AuthResponse(token);
     }

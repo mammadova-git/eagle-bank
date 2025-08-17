@@ -14,8 +14,10 @@ public class Transaction {
     private Long id;
 
     private String type;
-
     private Double amount;
+    private String currency;
+    private String reference;
+    private String createdTimestamp;
 
     @ManyToOne
     @JoinColumn(name = "accountId")

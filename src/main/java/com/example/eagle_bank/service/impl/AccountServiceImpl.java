@@ -1,8 +1,9 @@
 package com.example.eagle_bank.service.impl;
 
+import com.example.eagle_bank.exception.AccountAlreadyExistsException;
 import com.example.eagle_bank.mapper.AccountMapper;
-import com.example.eagle_bank.dto.AccountRequest;
-import com.example.eagle_bank.dto.AccountResponse;
+import com.example.eagle_bank.dto.CreateBankAccountRequest;
+import com.example.eagle_bank.dto.BankAccountResponse;
 import com.example.eagle_bank.entity.Account;
 import com.example.eagle_bank.entity.User;
 import com.example.eagle_bank.exception.AccountAccessDeniedException;
@@ -29,21 +30,26 @@ public class AccountServiceImpl implements AccountService {
     private final AccountMapper accountMapper;
 
     @Override
-    public AccountResponse createAccount(AccountRequest accountRequest, Authentication authentication) {
+    public BankAccountResponse createAccount(CreateBankAccountRequest createBankAccountRequest, Authentication authentication) {
         UserPrincipal principal = (UserPrincipal) authentication.getPrincipal();
         Long userId = principal.getUserId();
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("User not found", HttpStatus.NOT_FOUND, userId));
+        if (accountRepository.existsByUserIdAndNameAndAccountType(
+                userId, createBankAccountRequest.getName(), createBankAccountRequest.getAccountType())) {
+            throw new AccountAlreadyExistsException("Account already exists");
+        }
 
-        Account account = accountMapper.toEntity(accountRequest, user);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User not found", HttpStatus.NOT_FOUND));
+
+        Account account = accountMapper.toEntity(createBankAccountRequest, user);
         Account savedAccount = accountRepository.save(account);
 
         return accountMapper.toDto(savedAccount);
     }
 
     @Override
-    public List<AccountResponse> getAccounts(Authentication authentication) {
+    public List<BankAccountResponse> getAccounts(Authentication authentication) {
         UserPrincipal principal = (UserPrincipal) authentication.getPrincipal();
         Long userId = principal.getUserId();
 
@@ -55,15 +61,15 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public AccountResponse getAccount(Long accountId, Authentication authentication) {
+    public BankAccountResponse getAccount(Long accountId, Authentication authentication) {
         UserPrincipal principal = (UserPrincipal) authentication.getPrincipal();
         Long userId = principal.getUserId();
 
         Account account = accountRepository.findById(accountId)
-                .orElseThrow(() -> new AccountNotFoundException("Account not found", HttpStatus.NOT_FOUND, accountId));
+                .orElseThrow(() -> new AccountNotFoundException("Account not found", HttpStatus.NOT_FOUND));
 
         if (!account.getUser().getId().equals(userId)) {
-            throw new AccountAccessDeniedException("You are not authorized to access this account.", HttpStatus.FORBIDDEN, accountId);
+            throw new AccountAccessDeniedException("You are not authorized to access this account.", HttpStatus.FORBIDDEN);
         }
 
         return accountMapper.toDto(account);
