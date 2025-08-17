@@ -24,7 +24,7 @@ Eagle Bank is a simple banking application built with Java and Spring Boot. It p
 Make sure you have the following installed:
 
 - Java 17+
-- Maven
+- Gradle
 
 ### Installation
 
